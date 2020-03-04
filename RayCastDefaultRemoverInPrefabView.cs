@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public static class RayCastDefaultRemoverInPrefabView
+public static class RaycastDefaultRemoverInPrefabView
 {
     private static GameObject _tempPrefab;
     private static List<Graphic> _tempPrefabGraphics = new List<Graphic>();
