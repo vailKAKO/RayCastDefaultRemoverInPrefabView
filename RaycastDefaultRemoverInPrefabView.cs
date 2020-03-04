@@ -4,11 +4,14 @@ using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEditor.Experimental.SceneManagement.PrefabStageUtility;
 
 public static class RaycastDefaultRemoverInPrefabView
 {
-    private static GameObject _tempPrefab;
     private static List<Graphic> _tempPrefabGraphics = new List<Graphic>();
+
+    private static PrefabStage _recentPrefab;
+    private static GameObject _instance;
 
     [InitializeOnLoadMethod]
     private static void Initialize()
@@ -19,33 +22,34 @@ public static class RaycastDefaultRemoverInPrefabView
     private static void OnHierarchyChanged()
     {
         if (Application.isPlaying) return;
+        var tmpCurrentStageId = GetCurrentPrefabStage();
+        if (tmpCurrentStageId == null) return;
 
-        if (PrefabStageUtility.GetCurrentPrefabStage() == null) return;
 
-        var instance = PrefabStageUtility.GetCurrentPrefabStage().prefabContentsRoot;
-
-        Debug.Log($"{_tempPrefabGraphics.Count.ToString()} graphics existed");
-        Debug.Log($"Object {instance.name} is loaded");
-
-        if (_tempPrefabGraphics.Count != 0 || (_tempPrefab == null || instance.name != _tempPrefab.name))
+        if (_recentPrefab == null || _recentPrefab != tmpCurrentStageId || _instance == null)
         {
-            var currentGraphic = instance.GetComponentsInChildren<Graphic>();
-
-            foreach (var tmp in currentGraphic)
-            {
-                if (_tempPrefabGraphics.Contains(tmp)) continue;
-                Debug.Log($"{tmp.name} is new Object");
-                tmp.raycastTarget = tmp.GetComponent<IEventSystemHandler>() != null;
-            }
-        }
-        else
-        {
-            Debug.Log("this may different prefab from recent. load next.");
+            _recentPrefab = tmpCurrentStageId;
+            _instance = tmpCurrentStageId.prefabContentsRoot;
+            Debug.Log("this may new or different from current opened prefab. load next.");
+            AddGraphicComponent();
+            return;
         }
 
-        _tempPrefab = instance;
+        var currentGraphic = _instance.GetComponentsInChildren<Graphic>();
 
-        var tmpList = _tempPrefab.GetComponentsInChildren<Graphic>();
+        foreach (var tmp in currentGraphic)
+        {
+            if (_tempPrefabGraphics.Contains(tmp)) continue;
+            Debug.Log($"{tmp.name} is new Object");
+            tmp.raycastTarget = tmp.GetComponent<IEventSystemHandler>() != null;
+        }
+
+        AddGraphicComponent();
+    }
+
+    private static void AddGraphicComponent()
+    {
+        var tmpList = _instance.GetComponentsInChildren<Graphic>();
         _tempPrefabGraphics = new List<Graphic>();
         foreach (var content in tmpList)
         {
