@@ -1,4 +1,4 @@
-# RayCastDefaultRemoverInPrefabView
+# RaycastDefaultRemoverInPrefabView
 disable RaycastTarget default in prefab view
 
 put RaycastDefaultRemoverInPrefabView.cs on your Unity project.
