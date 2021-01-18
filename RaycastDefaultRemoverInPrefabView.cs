@@ -1,3 +1,7 @@
+// Copyright (c) 2021 Hiroyuki Kako
+// This software is released under the MIT License, see LICENSE.
+
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Experimental.SceneManagement;
@@ -6,12 +10,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static UnityEditor.Experimental.SceneManagement.PrefabStageUtility;
 
-public static class RaycastDefaultRemoverInPrefabView
+public class RaycastDefaultRemoverInPrefabView : EditorWindow
 {
     private static List<Graphic> _tempPrefabGraphics = new List<Graphic>();
 
     private static PrefabStage _recentPrefab;
     private static GameObject _instance;
+    private static bool _isActive;
 
     [InitializeOnLoadMethod]
     private static void Initialize()
@@ -19,8 +24,24 @@ public static class RaycastDefaultRemoverInPrefabView
         EditorApplication.hierarchyChanged += OnHierarchyChanged;
     }
 
+
+    [MenuItem("KEditorExtensions/RaycastDefaultRemoverInPrefabView")]
+    private static void Open()
+    {
+        GetWindow<RaycastDefaultRemoverInPrefabView>("Toggle");
+    }
+
+    private void OnGUI()
+    {
+        using (new GUILayout.HorizontalScope())
+        {
+            _isActive = EditorGUILayout.Toggle("Use RaycastDefaultRemoverInPrefabView", _isActive);
+        }
+    }
+
     private static void OnHierarchyChanged()
     {
+        if (!_isActive) return;
         if (Application.isPlaying) return;
         var tmpCurrentStageId = GetCurrentPrefabStage();
         if (tmpCurrentStageId == null) return;
@@ -57,3 +78,4 @@ public static class RaycastDefaultRemoverInPrefabView
         }
     }
 }
+#endif
